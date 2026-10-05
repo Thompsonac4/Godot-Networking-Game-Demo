@@ -476,6 +476,33 @@ func return_to_lobby() -> void:
 	scores.clear()
 	scores_changed.emit()
 
+	if not multiplayer.is_server():
+		return
+	if _release_spawned_nodes():
+		# Those frees become despawn packets on the next frame. Unload the map
+		# after that, or clients delete the nodes themselves and then reject
+		# the host's despawn.
+		await get_tree().process_frame
+	if multiplayer.multiplayer_peer == null:
+		return
+	_unload_match_scene.rpc()
+
+
+# Frees pickups and projectiles so clients drop them before the map goes away
+func _release_spawned_nodes() -> bool:
+	if Global.spawn_container == null:
+		return false
+	var children := Global.spawn_container.get_children()
+	if children.is_empty():
+		return false
+	for child in children:
+		child.queue_free()
+	return true
+
+
+# Removes the map, players, and hud, then shows the lobby
+@rpc("authority", "call_local", "reliable")
+func _unload_match_scene() -> void:
 	var tree := get_tree()
 	if tree == null:
 		return

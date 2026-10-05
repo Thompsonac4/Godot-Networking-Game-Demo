@@ -77,6 +77,7 @@ var _music: AudioStreamPlayer
 var _music_gain := 1.0
 var _last_capture_index := -2
 var _last_contested := false
+var _volume_sliders: Array[Dictionary] = []
 
 
 # Sets up the buses, the sound pool, and the menu music
@@ -93,6 +94,7 @@ func _ready() -> void:
 		add_child(player)
 		_pool.append(player)
 	_apply_volumes()
+	volumes_changed.connect(_sync_volume_sliders)
 
 	_apply_borderless_fullscreen()
 	if Network.has_signal("match_started"):
@@ -354,14 +356,31 @@ func _add_slider(box: VBoxContainer, title: String, is_music: bool) -> void:
 	box.add_child(slider)
 	if is_music:
 		slider.value_changed.connect(set_music_volume)
-		volumes_changed.connect(func() -> void:
-			slider.set_value_no_signal(music_volume)
-		)
 	else:
 		slider.value_changed.connect(set_sfx_volume)
-		volumes_changed.connect(func() -> void:
-			slider.set_value_no_signal(sfx_volume)
-		)
+	# Keep the slider on this node. A lambda that closes over the local
+	# variable sees null once _add_slider returns, then crashes on the next
+	# volume change.
+	_volume_sliders.append({ "slider": slider, "music": is_music })
+	slider.tree_exiting.connect(_forget_slider.bind(slider))
+
+
+# Drops a slider that is leaving the tree
+func _forget_slider(slider: Node) -> void:
+	for i in range(_volume_sliders.size() - 1, -1, -1):
+		if _volume_sliders[i]["slider"] == slider:
+			_volume_sliders.remove_at(i)
+
+
+# Copies the saved volumes back onto every open slider
+func _sync_volume_sliders() -> void:
+	for i in range(_volume_sliders.size() - 1, -1, -1):
+		var slider: HSlider = _volume_sliders[i]["slider"]
+		if not is_instance_valid(slider):
+			_volume_sliders.remove_at(i)
+			continue
+		var value := music_volume if _volume_sliders[i]["music"] else sfx_volume
+		slider.set_value_no_signal(value)
 
 
 # Pushes the saved volumes onto the buses and anything already playing
