@@ -5,7 +5,8 @@ A multiplayer arena FPS built with **Godot 4.6** and **GDScript**.
 Players choose between melee and ranged characters, join a multiplayer session, and compete across different game modes including **Deathmatch** and **Point Capture**.
 
 The project focuses on multiplayer gameplay, server-authoritative combat, player movement, items, and match management.
-
+## Basic Video Demo
+[Youtube](youtube.com/watch?v=snxFo3aSMbU&feature=youtu.be)
 ## Features
 
 * **Multiplayer** — Create or join matches using session codes
