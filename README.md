@@ -6,7 +6,7 @@ Players choose between melee and ranged characters, join a multiplayer session, 
 
 The project focuses on multiplayer gameplay, server-authoritative combat, player movement, items, and match management.
 ## Basic Video Demo
-[Youtube](youtube.com/watch?v=snxFo3aSMbU&feature=youtu.be)
+[Youtube](https://www.youtube.com/watch?v=snxFo3aSMbU)
 ## Features
 
 * **Multiplayer** — Create or join matches using session codes
